@@ -129,7 +129,7 @@ void chunkFile(string filePath, Bin* binptr, vector<string>* recipe) {
 
 string writeBinAndRecipeToDisk(string destinationPath, Bin *binptr, vector<string> *recipe_ptr, string wholeFileHash) {	// writes a bin to disk, returns path to bin location
 	string repChunkID = binptr->begin()->chunkID;	// using representative chunk id as directory name
-	string destinationDirPath = destinationPath + repChunkID;
+	string destinationDirPath = destinationPath + '/' + repChunkID;
 
 	// Create directory for chunks
 	if(mkdir(destinationDirPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0 ) {
