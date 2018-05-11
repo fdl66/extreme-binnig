@@ -170,7 +170,7 @@ string writeBinAndRecipeToDisk(string destinationPath, Bin *binptr, vector<strin
 	fs_forBinAndRecipeFiles.close();
 
 	// File recipe includes binID, original path, and chunk order. File name is r_<wholeFileHash>.recipe
-	string recipeFile = destinationPath + "r_" + wholeFileHash + ".recipe";
+	string recipeFile = destinationPath + "/r_" + wholeFileHash + ".recipe";
 
 	// Write order of ChunkIDs to recipe file
 	fs_forBinAndRecipeFiles.open(recipeFile);

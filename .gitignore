@@ -1,1 +1,10 @@
 .idea
+CMakeFiles
+XB_Backup
+XB_Restore
+Makefile
+CMakeCache.txt
+cmake_install.cmake
+restore*
+*.cbp
+cmake-build-debug
