@@ -2,6 +2,8 @@
 // Created by marcusljx on 26/01/16.
 //
 #include <cstdlib>
+#include <cstdio>
+#include <cstring>
 #include <iostream>
 #include <dirent.h>
 #include <sys/stat.h>
@@ -10,8 +12,9 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <vector>
+#include <libgen.h>
 #include "XB_includes.h"
-
+#define MAXSIZE 1000
 using namespace std;
 
 string targetDirPath;
@@ -45,6 +48,30 @@ string getRelativeParentPath(string path) {
 	return result;
 }
 //===========================================
+void Createdir(const char *path)
+{
+    char data[MAXSIZE];
+    char path_tmp[MAXSIZE];
+    strcpy(path_tmp,path);
+    if((strcmp(path,".") == 0) || (strcmp(path,"/")==0))
+        return;
+    if(access(path,F_OK) == 0)
+        return;
+    else{
+        strcpy(data,path);
+        dirname(path_tmp);
+        Createdir(path_tmp);
+
+    }
+    if(mkdir(data, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0){
+        if(errno == EEXIST) {
+            errno = 0;	// ignore error if directory already exists.
+        } else {
+            m_err("Error Creating Folder ");	// otherwise exit.
+        }
+    }
+    return;
+}
 
 void restoreRecipeFile(string recipeFilePath) {		// Restores a file and its duplicates to the relative path indicated in the recipe file
 	string line;
@@ -75,7 +102,7 @@ void restoreRecipeFile(string recipeFilePath) {		// Restores a file and its dupl
 
 				// Append chunk to fileContent (Q: not sure if there are more efficient methods for doing this?)
 				mappedFile* mf = mapFileIntoMem_read(chunkPath);
-				fileContent += string(mf->contents_ptr);
+                if(mf->contents_size>0)fileContent += string(mf->contents_ptr);
 				munmap(mf->contents_ptr, mf->contents_size);
 
 				//todo: read all remaining lines (chunk order), read chunk file and patch.
@@ -92,13 +119,7 @@ void restoreRecipeFile(string recipeFilePath) {		// Restores a file and its dupl
 
 		// Create directories if needed
 		if(parentPath.size() != 0) {
-			if(mkdir(parentPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0 ) {
-				if(errno == EEXIST) {
-					errno = 0;	// ignore error if directory already exists.
-				} else {
-					m_err("Error Creating Folder " + parentPath);	// otherwise exit.
-				}
-			}
+            Createdir(parentPath.c_str());
 		}
 
 		// Write content to file

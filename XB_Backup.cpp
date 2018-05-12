@@ -97,7 +97,18 @@ void chunkFile(string filePath, Bin* binptr, vector<string>* recipe) {
 	char* chunk_begin = contents;
 	char* chunk_end;
 
-	for(off_t i=0; i<(fileLength-WINDOW_SIZE); i++) {
+    if((long)fileLength-WINDOW_SIZE<=0){
+        string CHUNK(chunk_begin, fileLength);
+        bin_entry newEntry;
+        if(fileLength == 0) newEntry.chunkID = "0";
+        else newEntry.chunkID = md5_hash(chunk_begin);
+        newEntry.chunkSize = fileLength;
+        newEntry.chunkContents = CHUNK;
+        binptr->insert(newEntry);
+        recipe->push_back(newEntry.chunkID);
+    }
+    else if(fileLength != 0)
+	for(off_t i=0; i<((long)fileLength-WINDOW_SIZE); i++) {
 		// containers for hashing
 		string slidingWindow((contents+i), WINDOW_SIZE);
 
@@ -230,7 +241,8 @@ void backupFile(string filepath, string destinationDirPath) {	// process for bac
 
 	// Calculate whole file hash
 	mappedFile* mfile = mapFileIntoMem_read(filepath);
-	string wholeFileHash = md5_hash(mfile->contents_ptr);
+    string wholeFileHash = "0";
+    if(mfile->contents_size > 0) wholeFileHash = md5_hash(mfile->contents_ptr);
 	munmap(mfile->contents_ptr, mfile->contents_size);
 	cout << "## \t" << wholeFileHash << endl;
 
@@ -253,7 +265,7 @@ void backupFile(string filepath, string destinationDirPath) {	// process for bac
 
 		} else {
 			// Reconstruct Recipe File Path
-			string recipeFilePath = destinationDirPath + "r_" + wholeFileHash + ".recipe";
+			string recipeFilePath = destinationDirPath + "/r_" + wholeFileHash + ".recipe";
 
 			addTargetPathToRecipeFile(recipeFilePath, (*recipe_ptr)[0]);	// first entry in recipe is target file path
 		}

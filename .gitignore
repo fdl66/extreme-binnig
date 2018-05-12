@@ -8,3 +8,4 @@ cmake_install.cmake
 restore*
 *.cbp
 cmake-build-debug
+./tmp
